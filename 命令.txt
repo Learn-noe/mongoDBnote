@@ -1,0 +1,200 @@
+-- 修改字段名
+> db.stu.update({name:'马谡'},{$rename:{'intro':'jieshao'}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.stu.find()
+{ "_id" : ObjectId("5816ddea8687ab8c231fa713"), "name" : "曹操", "age" : 30, "se
+x" : 1, "class" : "魏国" }
+{ "_id" : ObjectId("5816ddfa8687ab8c231fa714"), "name" : "刘备", "age" : 31, "se
+x" : 1, "class" : "蜀国" }
+{ "_id" : ObjectId("5816de0e8687ab8c231fa715"), "name" : "孙权", "age" : 28, "se
+x" : 1, "class" : "吴国" }
+{ "_id" : ObjectId("5816de1d8687ab8c231fa716"), "name" : "小乔", "age" : 20, "se
+x" : 2, "class" : "吴国" }
+{ "_id" : ObjectId("5816df1d8687ab8c231fa718"), "name" : "马谡", "age" : 40, "se
+x" : 1, "class" : "蜀国", "jieshao" : "倒霉孩子" }
+>
+
+--- $pull 删除数组中的某个值
+> db.stu.update({name:'caocao'},{$pull:{sons:3}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+>
+
+-- $pullAll 符合条件的值进行删除
+> db.stu.update({name:'caocao'},{$pullAll:{sons:[2,4,3,5]}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+--- $pushAll 压入多个值
+> db.stu.update({name:'caocao'},{$pushAll:{sons:[2,3,4,5,6,1,7,5,4]}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.stu.find()
+{ "_id" : ObjectId("5816ddea8687ab8c231fa713"), "name" : "曹操", "age" : 30, "se
+x" : 1, "class" : "魏国" }
+{ "_id" : ObjectId("5816ddfa8687ab8c231fa714"), "name" : "刘备", "age" : 31, "se
+x" : 1, "class" : "蜀国" }
+{ "_id" : ObjectId("5816de0e8687ab8c231fa715"), "name" : "孙权", "age" : 28, "se
+x" : 1, "class" : "吴国" }
+{ "_id" : ObjectId("5816de1d8687ab8c231fa716"), "name" : "小乔", "age" : 20, "se
+x" : 2, "class" : "吴国" }
+{ "_id" : ObjectId("5816df1d8687ab8c231fa718"), "name" : "马谡", "age" : 40, "se
+x" : 1, "class" : "蜀国", "jieshao" : "倒霉孩子" }
+{ "_id" : ObjectId("5816dfed8687ab8c231fa719"), "name" : "caocao", "age" : 18, "
+sex" : 1, "sons" : [ 1, 2, 3, 4, 5, 6, 1, 7, 5, 4 ] }
+>
+
+-- $addToSet 数组中有的值不再执行插入
+
+
+--- 在服务器上对于数据库来说：一定有账户和密码
+
+--- 创建管理员所在的库 admin 数据库
+> use admin
+switched to db admin
+>
+
+
+--- 添加管理员
+> db.createUser(
+... {
+... user:'admin',		// 账户
+... pwd:'123',			// 密码
+... roles:[{
+... role:'__system',		// 权限
+... db:'admin'				// 作用的数据库
+... }]
+... })
+Successfully added user: {
+        "user" : "admin",
+        "roles" : [
+                {
+                        "role" : "__system",
+                        "db" : "admin"
+                }
+        ]
+}
+>
+
+>db.createUser({user:'ad',pwd:'456',roles:[{role:'__system',db:'admin'}]})
+uccessfully added user: {
+       "user" : "ad",
+       "roles" : [
+               {
+                       "role" : "__system",
+                       "db" : "admin"
+               }
+       ]
+
+
+-- 权限 -- 启动mongo的服务时添加 --auth
+
+--- 进入数据验证时，一定要切换到admin数据库
+--- 验证 db.auth(账户,密码)
+
+> db.auth('admin','123')
+1	表示成功
+0 验证失败
+
+
+> db.createUser({user:'test',pwd:'test',roles:[{role:'read',db:'school'}]})
+Successfully added user: {
+        "user" : "test",
+        "roles" : [
+                {
+                        "role" : "read",
+                        "db" : "school"
+                }
+        ]
+}
+>
+
+--- 指定登录的地址:端口号/数据库 -u 用户  -p 密码
+C:\Users\Administrator>mongo 127.0.0.1:27017/admin -u admin -p
+2016-10-31T15:52:40.253+0800 I CONTROL  [main] Hotfix KB2731284 or later update
+is not installed, will zero-out data files
+MongoDB shell version: 3.2.10
+Enter password:
+connecting to: 127.0.0.1:27017/admin
+Server has startup warnings:
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten]
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten] ** WARNING: This 32-bit
+MongoDB binary is deprecated
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten]
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten]
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten] ** NOTE: This is a 32 bi
+t MongoDB binary.
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten] **       32 bit builds a
+re limited to less than 2GB of data (or less with --journal).
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten] **       Note that journ
+aling defaults to off for 32 bit and is currently off.
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten] **       See http://doch
+ub.mongodb.org/core/32bit
+2016-10-31T15:43:30.310+0800 I CONTROL  [initandlisten]
+> show dbs
+admin   0.078GB
+h515    0.078GB
+local   0.078GB
+school  0.078GB
+>
+
+
+-- 添加唯一索引
+> db.stu.ensureIndex({name:1},{unique:true})
+{
+        "createdCollectionAutomatically" : false,
+        "numIndexesBefore" : 1,
+        "numIndexesAfter" : 2,
+        "ok" : 1
+}
+> db.system.indexes.find()
+{ "v" : 1, "key" : { "_id" : 1 }, "name" : "_id_", "ns" : "school.stu" }
+{ "v" : 1, "unique" : true, "key" : { "name" : 1 }, "name" : "name_1", "ns" : "s
+chool.stu" }
+>
+
+-- 数据备份
+C:\Users\Administrator>mongodump -d school -o d:/databak
+2016-10-31T16:22:43.946+0800    writing school.system.indexes to
+2016-10-31T16:22:43.968+0800    done dumping school.system.indexes (2 documents)
+
+2016-10-31T16:22:43.971+0800    writing school.stu to
+2016-10-31T16:22:43.973+0800    done dumping school.stu (6 documents)
+
+C:\Users\Administrator>
+
+-- 数据恢复
+C:\Users\Administrator>mongorestore -d school d:/databak/school
+2016-10-31T16:24:17.580+0800    building a list of collections to restore from d
+:\databak\school dir
+2016-10-31T16:24:17.595+0800    reading metadata for school.stu from d:\databak\
+school\stu.metadata.json
+2016-10-31T16:24:18.142+0800    restoring school.stu from d:\databak\school\stu.
+bson
+2016-10-31T16:24:18.149+0800    restoring indexes for collection school.stu from
+ metadata
+2016-10-31T16:24:18.151+0800    finished restoring school.stu (6 documents)
+2016-10-31T16:24:18.152+0800    done
+
+C:\Users\Administrator>
+
+
+--- 将数据导出
+C:\Users\Administrator>mongoexport -d school -c stu -q {} -f _id,name,age,sex --
+csv > d:/databak/stu.csv
+2016-10-31T16:26:08.663+0800    csv flag is deprecated; please use --type=csv in
+stead
+2016-10-31T16:26:08.676+0800    connected to: localhost
+2016-10-31T16:26:08.689+0800    exported 6 records
+
+-- 将数据导入
+	-d 数据库名
+	-c 集合
+	-type 指定要导入的文件类型
+	--headerline 指定csv文件的表头
+	--drop 如果之前存在数据，进行删除
+	
+C:\Users\Administrator>mongoimport -d school -c stu --type csv --headerline --dr
+op <d:/databak/stu.csv
+2016-10-31T16:29:14.006+0800    connected to: localhost
+2016-10-31T16:29:14.015+0800    dropping: school.stu
+2016-10-31T16:29:14.031+0800    imported 6 documents
+
+C:\Users\Administrator>mongo

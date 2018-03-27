@@ -1,0 +1,472 @@
+--- 安装mongodb之后学会添加系统环境变量 path 
+	把mongod.exe和mongo.exe文件所在的目录添加到Path
+
+--- 启动mongo服务
+	在命令行执行 mongod --dbpath=指定目录 --storageEngine=mmapv1
+
+	服务器开启之后，占用的系统端口号：27017
+
+--- 连接服务器 mongo
+
+--- 退出mongo环境 ，使用exit或者ctrl+c
+	默认连接的数据 test(空)
+
+--- 当前服务器系统下所有的数据库
+	show dbs
+
+--- 选择/创建数据库（如果不存在自动创建）
+	> use school
+	switched to db school
+	>
+
+--- 删除数据库
+	> db.dropDatabase()
+	{ "ok" : 1 }
+	>
+
+
+--- 查看当前所在的数据库
+	> db
+	schol
+	>
+
+	> db.getName()
+	schol
+	>
+
+MongoDB中数据库系统：
+	数据库	database 
+		集合 	collection
+			文档	document
+				字段 field 字段值 value
+
+--- 创建一个stu集合并插入一条文档(如果stu不存在自动创建)
+> db.stu.insert({"name":"小丁丁","age":"23","sex":"1"})
+WriteResult({ "nInserted" : 1 })
+>
+
+--- 查询stu集合中的所有的数据
+> db.stu.find()
+{ "_id" : ObjectId("5812ed864c0601b23560b356"), "name" : "小丁丁", "age" : "23",
+ "sex" : "1" }
+>
+
+--- 显示当前数据库下所有的集合
+> show collections
+stu
+
+// 当前其他集合中所有的索引
+system.indexes
+>
+
+--- 创建集合 class
+> db.createCollection('class')
+{ "ok" : 1 }
+>
+
+--- 插入数据 -- 插入类型的数据
+> db.stu.insert({"name":"孙悟空","age":300,sex:"1"})		// 插入的age是数值类型
+WriteResult({ "nInserted" : 1 })
+
+> db.stu.find()
+{ "_id" : ObjectId("5812ed864c0601b23560b356"), "name" : "小丁丁", "age" : "23","sex" : "1" }	// 字符串类型
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,"sex" : "1" }
+>
+
+--- 查询所有年龄为23的数据
+> db.stu.find({age:23})		// 年龄的值为 数值类型的23
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+
+--- find() 默认查找所有的数据
+--- 	{age:23}	年龄等于23的数据
+> db.stu.find({age:"23"})		// 字符串类型的23
+{ "_id" : ObjectId("5812ed864c0601b23560b356"), "name" : "小丁丁", "age" : "23",
+ "sex" : "1" }
+>
+
+--- 插入 -- 类似于json格式的BSON
+> db.stu.insert({"name":"程咬金",age:200,sex:2})
+WriteResult({ "nInserted" : 1 })
+>
+> db.stu.insert({name:'秦叔宝',age:200,sex:2})
+WriteResult({ "nInserted" : 1 })
+>
+
+-- 删除一条记录
+> db.stu.remove({name:'李世民'}))
+WriteResult({ "nRemoved" : 1 })
+> 
+
+--- 更新 db.stu.update()
+
+--- 现在相当于把name=程咬金数据，现在变成 age:201
+> db.stu.update({name:'程咬金'},{age:201})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+--- $set 指定字段修改 
+> db.stu.update({name:'程咬金'},{$set:{age:205}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+-- 执行插入时可以是任意类型的数据
+> db.stu.insert({name:'李渊',sons:['李建成','李世民','李元吉','李元霸']})
+WriteResult({ "nInserted" : 1 })
+
+// 查询
+> db.stu.find()
+{ "_id" : ObjectId("5812ed864c0601b23560b356"), "name" : "小丁丁", "age" : "23",
+ "sex" : "1" }
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+{ "_id" : ObjectId("5812efab4c0601b23560b359"), "age" : 205, "name" : "程咬金",
+"sex" : 1 }
+{ "_id" : ObjectId("5812f0044c0601b23560b35a"), "name" : "秦叔宝", "age" : 200,
+"sex" : 2 }
+{ "_id" : ObjectId("5812fb825398582bdacdadc3"), "name" : "李世民" }
+{ "_id" : ObjectId("5812fc545398582bdacdadc4"), "name" : "李渊", "sons" : [ "李
+建成", "李世民", "李元吉", "李元霸" ] }
+>
+
+// 关于查询的条件：
+	name = 孙悟空 数据
+> db.stu.find({name:'孙悟空'})
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812fcbb5398582bdacdadc5"), "name" : "孙悟空", "age" : 100,
+"sex" : 1 }
+>
+	年龄 age > 100数据
+	 	{age:{$gt:100}}		按照年龄进行查找，特点 $gt(>) 100
+> db.stu.find({age:{$gt:100}})
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812efab4c0601b23560b359"), "age" : 205, "name" : "程咬金",
+"sex" : 1 }
+{ "_id" : ObjectId("5812f0044c0601b23560b35a"), "name" : "秦叔宝", "age" : 200,
+"sex" : 2 }
+>
+
+	年龄 < 100
+> db.stu.find({age:{$lt:100}})
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+
+	$gt equl => $gte 大于等于
+
+> db.stu.find({age:{$gte:100}})
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812efab4c0601b23560b359"), "age" : 205, "name" : "程咬金",
+"sex" : 1 }
+{ "_id" : ObjectId("5812f0044c0601b23560b35a"), "name" : "秦叔宝", "age" : 200,
+"sex" : 2 }
+{ "_id" : ObjectId("5812fcbb5398582bdacdadc5"), "name" : "孙悟空", "age" : 100,
+"sex" : 1 }
+>
+
+	$lt equl => $lte 小于等于
+> db.stu.find({age:{$lte:100}})
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+{ "_id" : ObjectId("5812fcbb5398582bdacdadc5"), "name" : "孙悟空", "age" : 100,
+"sex" : 1 }
+>
+
+-- findOne() 找到第一条
+> db.stu.findOne()
+{
+        "_id" : ObjectId("5812ed864c0601b23560b356"),
+        "name" : "小丁丁",
+        "age" : "23",
+        "sex" : "1"
+}
+
+-- 格式化显示数据
+> db.stu.find().pretty()
+{
+        "_id" : ObjectId("5812ed864c0601b23560b356"),
+        "name" : "小丁丁",
+        "age" : "23",
+        "sex" : "1"
+}
+{
+        "_id" : ObjectId("5812ee6e4c0601b23560b357"),
+        "name" : "孙悟空",
+        "age" : 300,
+        "sex" : "1"
+}
+{
+        "_id" : ObjectId("5812eeba4c0601b23560b358"),
+        "name" : "大布丁",
+        "age" : 23,
+        "sex" : "2"
+}
+{
+        "_id" : ObjectId("5812efab4c0601b23560b359"),
+        "age" : 205,
+        "name" : "程咬金",
+        "sex" : 1
+}
+{
+        "_id" : ObjectId("5812f0044c0601b23560b35a"),
+        "name" : "秦叔宝",
+        "age" : 200,
+        "sex" : 2
+}
+{ "_id" : ObjectId("5812fb825398582bdacdadc3"), "name" : "李世民" }
+{
+        "_id" : ObjectId("5812fc545398582bdacdadc4"),
+        "name" : "李渊",
+        "sons" : [
+                "李建成",
+                "李世民",
+                "李元吉",
+                "李元霸"
+        ]
+}
+{
+        "_id" : ObjectId("5812fcbb5398582bdacdadc5"),
+        "name" : "孙悟空",
+        "age" : 100,
+        "sex" : 1
+}
+>
+
+--- 统计获取的文档的数量
+> db.stu.find().count()
+8
+>
+
+> db.stu.find({name:'孙悟空'}).count()
+2
+>
+--- count() 统计数量
+> db.stu.find({sex:2}).count()
+1
+>
+
+-- 条件 and 
+--- 性别为女，年龄在100以上
+> db.stu.find({sex:2,age:{$gt:100}})
+{ "_id" : ObjectId("5812f0044c0601b23560b35a"), "name" : "秦叔宝", "age" : 200,
+"sex" : 2 }
+>
+
+--- 关于条件 or
+---- 年龄在100以下或者200以上
+> db.stu.find({$or:[{age:{$lt:100}},{age:{$gt:200}}]})
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+{ "_id" : ObjectId("5812efab4c0601b23560b359"), "age" : 205, "name" : "程咬金",
+"sex" : 1 }
+>
+
+--- 查找sex字段的值不是数值1的
+> db.stu.find({sex:{$ne:1}})
+{ "_id" : ObjectId("5812ed864c0601b23560b356"), "name" : "小丁丁", "age" : "23",
+ "sex" : "1" }
+{ "_id" : ObjectId("5812ee6e4c0601b23560b357"), "name" : "孙悟空", "age" : 300,
+"sex" : "1" }
+{ "_id" : ObjectId("5812eeba4c0601b23560b358"), "name" : "大布丁", "age" : 23, "
+sex" : "2" }
+{ "_id" : ObjectId("5812f0044c0601b23560b35a"), "name" : "秦叔宝", "age" : 200,
+"sex" : 2 }
+{ "_id" : ObjectId("5812fb825398582bdacdadc3"), "name" : "李世民" }
+{ "_id" : ObjectId("5812fc545398582bdacdadc4"), "name" : "李渊", "sons" : [ "李
+建成", "李世民", "李元吉", "李元霸" ] }
+>
+
+-- 清空stu集合中的所有的数据
+> db.stu.remove({})
+WriteResult({ "nRemoved" : 8 })
+>
+
+-- 删除一个集合
+> db.stu.drop()
+true
+>
+
+> db.stu.find()
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100,
+"sex" : 1, "class" : "花果山" }
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "name" : "唐僧", "age" : 20, "se
+x" : 1, "class" : "大唐" }
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200,
+"sex" : 1, "class" : "高老庄" }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30, "
+sex" : 2, "class" : "流沙河" }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "name" : "敖烈", "age" : 30, "se
+x" : 2, "class" : "西海" }
+>
+
+--- sort() 排序 
+--- 升序 sort({age:1})
+> db.stu.find().sort({age:1})
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "name" : "唐僧", "age" : 20, "se
+x" : 1, "class" : "大唐" }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30, "
+sex" : 2, "class" : "流沙河" }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "name" : "敖烈", "age" : 30, "se
+x" : 2, "class" : "西海" }
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100,
+"sex" : 1, "class" : "花果山" }
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200,
+"sex" : 1, "class" : "高老庄" }
+>
+
+--- 降序 sort({age:-1})
+> db.stu.find().sort({age:-1})
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200,
+"sex" : 1, "class" : "高老庄" }
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100,
+"sex" : 1, "class" : "花果山" }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30, "
+sex" : 2, "class" : "流沙河" }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "name" : "敖烈", "age" : 30, "se
+x" : 2, "class" : "西海" }
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "name" : "唐僧", "age" : 20, "se
+x" : 1, "class" : "大唐" }
+>
+
+
+> db.stu.update({name:'敖烈'},{$set:{sex:1}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+>
+
+--- 1 表示升序，-1 降序
+
+-- 先按年龄降序，再按性别升序
+> db.stu.find().sort({age:-1,sex:1})
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200,
+"sex" : 1, "class" : "高老庄" }
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100,
+"sex" : 1, "class" : "花果山" }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "name" : "敖烈", "age" : 30, "se
+x" : 1, "class" : "西海" }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30, "
+sex" : 2, "class" : "流沙河" }
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "name" : "唐僧", "age" : 20, "se
+x" : 1, "class" : "大唐" }
+>
+
+--- find() 第一个参数是一个空对象，表示要查询所有的数据
+---			第二个参数 {age:true}
+> db.stu.find({},{age:true})
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "age" : 100 }
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "age" : 20 }
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "age" : 200 }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "age" : 30 }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "age" : 30 }
+>
+
+--- 第二个参数 {字段名:true(要)、false(不要)}
+> db.stu.find({},{age:true,name:true})
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100 }
+
+{ "_id" : ObjectId("581307de42a0adbc0a3c26d0"), "name" : "唐僧", "age" : 20 }
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200 }
+
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30 }
+{ "_id" : ObjectId("5813089642a0adbc0a3c26d3"), "name" : "敖烈", "age" : 30 }
+>
+
+--- 学员有班级 --- 有多少个班，每个班有多少人
+
+--- 按照班级进行分组
+> db.stu.aggregate([{$group:{_id:"$class"}}])
+{ "_id" : "西海" }
+{ "_id" : "花果山" }
+{ "_id" : "高老庄" }
+{ "_id" : "大唐" }
+{ "_id" : "流沙河" }
+>
+
+--- 按照班级进行分组，统计每个班的人数
+> db.stu.aggregate([{$group:{_id:"$class",num:{$sum:1}}}])
+{ "_id" : "西海", "num" : 2 }
+{ "_id" : "花果山", "num" : 3 }
+{ "_id" : "高老庄", "num" : 2 }
+{ "_id" : "大唐", "num" : 1 }
+{ "_id" : "流沙河", "num" : 1 }
+>
+
+--- limit() 限制查询
+
+--- 获取年龄最大的两个
+> db.stu.find().sort({age:-1}).limit(2)
+{ "_id" : ObjectId("5813080042a0adbc0a3c26d1"), "name" : "猪八戒", "age" : 200,
+"sex" : 1, "class" : "高老庄" }
+{ "_id" : ObjectId("58130e2242a0adbc0a3c26d4"), "name" : "西海龙王", "age" : 120
+, "sex" : 1, "class" : "西海" }
+>
+
+--- skip() 偏移、跳过
+> db.stu.find().sort({age:-1}).limit(2).skip(2)
+{ "_id" : ObjectId("581307c842a0adbc0a3c26cf"), "name" : "孙悟空", "age" : 100,
+"sex" : 1, "class" : "花果山" }
+{ "_id" : ObjectId("5813086b42a0adbc0a3c26d2"), "name" : "李六石", "age" : 30, "
+sex" : 2, "class" : "流沙河" }
+>
+
+/*
+	有页数，每页显示5条
+		假如一共有16条数据，现在是几页：4
+
+		第一页	find().skip(0).limit(5)
+		第二页	find().skip(5).limit(5)
+		第三页	find().skip(10).limit(5)
+
+		// 偏移量 = (n-1)*5
+
+		第n页 	find().skip(偏移量).limit(5)
+
+*/
+
+/*
+	update(第一个参数，第二个参数，第三个参数，第四个参数)
+		第一个参数 表示我们的条件
+		第二个参数 目的值
+		第三个参数 当更新的数据不存在时，是否自动创建	false ,表示不创建
+		第三个参数 表示是否对多个结果都执行
+			默认只更新第一个结果 false
+
+
+*/
+
+--- 更新数据，设置age在原有的基础+5 $inc increase
+> db.stu.update({},{$inc:{age:5}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+-- 第三个参数为true，表示如果数据不存在，自动创建
+> db.stu.update({name:'老君'},{name:'老子',age:1000},true)
+WriteResult({
+        "nMatched" : 0,
+        "nUpserted" : 1,
+        "nModified" : 0,
+        "_id" : ObjectId("581316f105042fc378aac1c6")
+})
+
+
+--- 第四个参数为真，表示给所有符合条件的数据都进行更新
+> db.stu.update({},{$inc:{age:5}},false,true)
+WriteResult({ "nMatched" : 10, "nUpserted" : 0, "nModified" : 10 })
+
+
+--- 删除指定的字段
+> db.stu.update({name:'孙悟空'},{$unset:{agee:''}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+
+---- 向某个字段属性中压入一个值，该字段一定要是数组
+> db.stu.update({name:'李渊'},{$push:{sons:'李元霸'}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+>
+
+--- $pop 弹出
+> db.stu.update({name:'李渊'},{$pop:{sons:''}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+>

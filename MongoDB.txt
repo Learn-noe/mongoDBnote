@@ -1,0 +1,118 @@
+网站：
+	静态网站：纯粹的html、css、js形成的文档
+		用户只能够去浏览(管理员自己手动的修改或者是添加了新的html页面)
+
+	动态网站：采用了数据库进行开发的网站
+		存在用户与网站的交互
+
+把网站的数据存储在数据库，在前台页面中去按照一定的要求查询数据库，得到结果，遍历出来
+
+数据库：
+	存储数据库的仓库！
+
+	关系型数据库：
+		MySQL SQLServer Oracle MariDB 
+
+	非关系性数据库
+		MongoDB Redis Memcache
+
+		以键值对的形式，存储时候以类似于json格式数据存储(Bson)
+
+
+// 测试MongoDB是否已经安装
+	1. 找到MongoDB的安装路径 
+		D:\Program Files\MongoDB\Server\3.2\bin
+			mongo.exe
+			mongod.exe		
+
+	MongoDB 是用于充当数据库，启动数据库服务，启动MongoDB服务
+		注意：
+			1. MongoDB进行数据存储的时候，需要指定存储的路径(手动创建数据库目录)
+			2. 一般来说我们要创建一个目录
+				创建 data，在data目录下再创建一个db目录
+				一般建议创建在系统盘符的根目录
+			3. MongoDB会默认使用 c:/data/db 目录当前服务器的数据库目录
+
+	启动服务：
+		数据库 database ==> db
+
+		命令：mongod --dbpath=d:/data/db --storageEngine=mmapv1
+			mongod 开启服务的命令
+			--dbpath	设置数据存储的路径,可以不写，默认找的是 c:/data/db
+			--storageEngine 数据存储的处理引擎
+				--storageEngine=mmapv1
+
+			执行完毕，返回的类似如下信息，表示开启成功！
+				2016-10-27T15:40:35.979+0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+
+		// MongoDB服务默认占用的端口号：27017
+		// 在地址栏上输出 localhost:27017
+
+		// 将mongd.exe文件路径加入path中
+			右键我的电脑 -- 属性 --- 高级系统设置 -- 环境变量 --- path
+				D:\Program Files\MongoDB\Server\3.2\bin
+				将路径写入，保存，退出
+
+			mongod.lock 启动了一个服务之后，自动有该文件
+
+		// 允许在data所在的目录，直接执行mongod，启动了服务器
+
+
+	// 连接数据库
+		在新窗口中执行 mongo 命令
+
+		// 连接数据库之后默认在 叫做 test 数据库中
+
+
+	// 数据库系统层级关系：
+		数据库 多个 db
+			集合 多个 collection
+				文档 多个 document  --- 一条记录就是一个文档
+					字段 
+
+
+			// 关于用户的信息 -- user 集合 
+			账户 username	密码 userpwd  年龄 age
+				张三			123456		20
+				李四			123			38
+
+			// 商品  goods 集合
+			商品名 goodsname 价格 price 库存数量 num
+
+	// MongoDB中的命令
+	1. 查看当前数据库系统中所有的数据库
+	> show dbs			--- 显示有数据的数据库
+	local  0.078GB
+	>
+
+	2. 创建数据库
+	> use h515		-- 如果数据库存在相当于切换数据库，不存在自动创建
+	switched to db h515
+	>
+
+	3. 在数据库中创建一个集合，创建一个文档
+		学生信息的集合，同时写入一条记录(文档)
+
+	// db 固定前缀 stu 集合的名称 insert 插入操作
+	> db.stu.insert({"usernmae":"孙悟空","sex":"1","age":"1000"})
+	WriteResult({ "nInserted" : 1 })
+	>
+
+	// 向stu集合中插入一条文档
+		// "username":"玉帝" 字段名:字段值 
+	> db.stu.insert({"username":"玉帝","sex":"1","age":"10000"})
+	WriteResult({ "nInserted" : 1 })
+	>
+
+	4. 显示当前数据库下的所有集合
+	> show collections
+	stu
+	system.indexes
+	>
+
+	5. 查询stu集合的所有数据 
+	> db.stu.find()
+	// _id 是数据库系统自动随机产生的一个标志
+	// 每产生一个文档，自动产生一个_id,唯一不重复
+	{ "_id" : ObjectId("5811be315301030865bd1a36"), "usernmae" : "孙悟空", "sex" : "1", "age" : "1000" }
+	>
